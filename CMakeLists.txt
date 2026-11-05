@@ -1,17 +1,37 @@
 cmake_minimum_required(VERSION 3.16)
 
 project(Project3
-    	DESCRIPTION "Project 3: Vehicle Fleet Maintenance Management System"
-    	LANGUAGES CXX)
+        VERSION 1.0.0
+        DESCRIPTION "Project 3: Vehicle Fleet Maintenance Management System"
+        LANGUAGES CXX
+)
 
-add_library(maintenance_schedule src/MaintenanceSchedule.cpp)
-target_include_directories(maintenance_schedule PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
-target_compile_features(maintenance_schedule PUBLIC cxx_std_11)
-set_target_properties(maintenance_schedule PROPERTIES CXX_EXTENSIONS OFF)
+include(FetchContent)
+FetchContent_Declare(
+  googletest
+  GIT_REPOSITORY "https://github.com/google/googletest"
+  GIT_TAG        v1.15.2
+)
 
-include(CTest)
-if(BUILD_TESTING)
-    add_executable(maintenance_schedule_tests tests/MaintenanceScheduleTests.cpp)
-    target_link_libraries(maintenance_schedule_tests PRIVATE maintenance_schedule)
-    add_test(NAME MaintenanceScheduleTests COMMAND maintenance_schedule_tests)
-endif()
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(googletest)
+
+set(TEST_CASES
+    tests/Vehicle_tests.cpp
+    tests/MaintenanceSchedule_tests.cpp
+)
+
+set(VEHICLE_MANAGER
+    src/MaintenanceSchedule.cpp
+    src/Vehicle.cpp
+)
+
+add_executable(Vehicle_Manager ${TEST_CASES} ${VEHICLE_MANAGER})
+
+target_link_libraries(Vehicle_Manager PRIVATE gtest_main)
+
+target_include_directories(Vehicle_Manager PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+
+enable_testing()
+include(GoogleTest)
+gtest_discover_tests(Vehicle_Manager)
