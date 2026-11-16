@@ -19,10 +19,12 @@ FetchContent_MakeAvailable(googletest)
 set(TEST_CASES
     tests/Vehicle_tests.cpp
     tests/MaintenanceSchedule_tests.cpp
+    tests/MaintenanceRecord_tests.cpp
 )
 
 set(VEHICLE_MANAGER
     src/MaintenanceSchedule.cpp
+    src/MaintenanceRecord.cpp
     src/Vehicle.cpp
 )
 
