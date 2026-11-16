@@ -6,28 +6,21 @@
 class MaintenanceSchedule
 {
 public:
-    // Throws std::invalid_argument for a blank name, nonpositive interval,
-    // or negative last-service mileage.
-    MaintenanceSchedule(const std::string& serviceName, int intervalMiles,
-                        int lastServiceMileage);
-
-    const std::string& getServiceName() const;
-    int getIntervalMiles() const;
+    MaintenanceSchedule(const std::string& serviceName, int intervalMiles, int lastServiceMileage); // prevents copying the original variable but also prevents modification of that variable
+    const std::string& getServiceName() const; // gets service name. uses const so getter wont change the schedule
+    int getIntervalMiles() const; // const needed at end so code cant adjust miles and then return them
     int getLastServiceMileage() const;
 
-    // Compatibility name: true when due OR overdue (including exact threshold).
-    // Throws std::invalid_argument if mileage precedes the last service.
-    bool isOverdue(int currentMileage) const;
-
-    // Updates this schedule only. Does not create a maintenance history record.
-    // Early service and repeated service at the same mileage are allowed.
-    // Throws std::invalid_argument if mileage precedes the last service.
+    bool isOverdue(int currentMileage) const; // checks if the service is overdue based on the current mileage and the last service mileage
     void recordService(int currentMileage);
 
 private:
-    std::string serviceName;
+    std::string serviceName; // attributes stored in the maintenance schedule
     int intervalMiles;
     int lastServiceMileage;
+
 };
 
+
 #endif // MAINTENANCE_SCHEDULE_H
+
