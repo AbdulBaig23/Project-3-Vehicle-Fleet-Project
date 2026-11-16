@@ -92,8 +92,8 @@ TEST_F(VehicleTest, SetStatus) {
 
     EXPECT_EQ(vehicle.getStatus(), VehicleStatus::AVAILABLE);
 
-    vehicle.setStatus(VehicleStatus::OVERDUE);
-    EXPECT_EQ(vehicle.getStatus(), VehicleStatus::OVERDUE);
+    vehicle.setStatus(VehicleStatus::IN_SERVICE);
+    EXPECT_EQ(vehicle.getStatus(), VehicleStatus::IN_SERVICE);
 
     vehicle.setStatus(VehicleStatus::OUT_OF_SERVICE);
     EXPECT_EQ(vehicle.getStatus(), VehicleStatus::OUT_OF_SERVICE);
@@ -111,4 +111,33 @@ TEST_F(VehicleTest, PureVirtualServiceRequiredBehavior) {
     // Test through polymorphism (Base class pointer)
     Vehicle* vPtr = &highMileageVehicle;
     EXPECT_TRUE(vPtr->isServiceRequired());
+}
+
+TEST_F(VehicleTest, LoggingServiceResetsDueMileageButKeepsScheduleAndHistory)
+{
+    Vehicle vehicle("VIN001", "Toyota", "Camry", 2021, 15000);
+
+    vehicle.addMaintenanceSchedule(
+        MaintenanceSchedule("Oil Change", 5000, 10000));
+
+    EXPECT_TRUE(vehicle.isServiceRequired());
+
+    const MaintenanceRecord record(
+        "MR-001", "Oil Change", "2026-11-16", 15000, 5000);
+    vehicle.logServiceEvent(record);
+
+    ASSERT_EQ(vehicle.getMaintenanceHistory().size(), 1u);
+    EXPECT_EQ(vehicle.getMaintenanceHistory()[0].getRecordId(), "MR-001");
+
+    ASSERT_EQ(vehicle.getMaintenanceSchedules().size(), 1u);
+    EXPECT_EQ(vehicle.getMaintenanceSchedules()[0].getLastServiceMileage(), 15000);
+    EXPECT_EQ(vehicle.getMaintenanceSchedules()[0].getIntervalMiles(), 5000);
+
+    EXPECT_FALSE(vehicle.isServiceRequired());
+
+    vehicle.updateMileage(19999);
+    EXPECT_FALSE(vehicle.isServiceRequired());
+
+    vehicle.updateMileage(20000);
+    EXPECT_TRUE(vehicle.isServiceRequired());
 }
