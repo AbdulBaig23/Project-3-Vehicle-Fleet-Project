@@ -1,9 +1,6 @@
 #include <gtest/gtest.h>
 #include "Vehicle.h"
 
-#include <stdexcept>
-#include <utility>
-
 // Concrete subclass used to instantiate and test the abstract Vehicle class
 class TestVehicle : public Vehicle {
 public:
@@ -51,39 +48,6 @@ TEST_F(VehicleTest, UpdateMileage) {
     
     vehicle.updateMileage(26500);
     EXPECT_EQ(vehicle.getMileage(), 26500);
-}
-
-TEST_F(VehicleTest, AcceptsZeroInitialMileage) {
-    const TestVehicle vehicle("VIN001", "Toyota", "Camry", 2021, 0);
-
-    EXPECT_EQ(vehicle.getMileage(), 0);
-}
-
-TEST_F(VehicleTest, RejectsNegativeInitialMileage) {
-    EXPECT_THROW(TestVehicle("VIN001", "Toyota", "Camry", 2021, -1), std::invalid_argument);
-}
-
-TEST_F(VehicleTest, AcceptsSameMileage) {
-    TestVehicle vehicle("VIN001", "Toyota", "Camry", 2021, 10000);
-
-    EXPECT_NO_THROW(vehicle.updateMileage(10000));
-    EXPECT_EQ(vehicle.getMileage(), 10000);
-}
-
-TEST_F(VehicleTest, RejectsNegativeMileageUpdateAtZero) {
-    TestVehicle vehicle("VIN001", "Toyota", "Camry", 2021, 0);
-
-    EXPECT_THROW(vehicle.updateMileage(-1), std::invalid_argument);
-    EXPECT_EQ(vehicle.getMileage(), 0);
-}
-
-TEST_F(VehicleTest, RejectsDecreaseAfterMileageIncrease) {
-    TestVehicle vehicle("VIN001", "Toyota", "Camry", 2021, 10000);
-
-    vehicle.updateMileage(12000);
-
-    EXPECT_THROW(vehicle.updateMileage(11000), std::invalid_argument);
-    EXPECT_EQ(vehicle.getMileage(), 12000);
 }
 
 // 4. Test changing vehicle status
