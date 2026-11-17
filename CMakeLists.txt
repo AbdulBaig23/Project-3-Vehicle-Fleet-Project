@@ -21,6 +21,7 @@ set(TEST_CASES
     tests/MaintenanceSchedule_tests.cpp
     tests/MaintenanceRecord_tests.cpp
     tests/Sedan_tests.cpp
+    tests/FleetManager_tests.cpp
 )
 
 set(VEHICLE_MANAGER
@@ -28,6 +29,7 @@ set(VEHICLE_MANAGER
     src/MaintenanceRecord.cpp
     src/Vehicle.cpp
     src/Sedan.cpp
+    src/FleetManager.cpp
 )
 
 add_executable(Vehicle_Manager ${TEST_CASES} ${VEHICLE_MANAGER} "src/Van.cpp" "include/Van.h" "include/Truck.h" "src/Truck.cpp" "include/ServiceDate.h")
