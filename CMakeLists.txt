@@ -22,22 +22,30 @@ set(TEST_CASES
     tests/MaintenanceRecord_tests.cpp
     tests/Sedan_tests.cpp
     tests/FleetManager_tests.cpp
+    tests/main_tests.cpp
 )
 
-set(VEHICLE_MANAGER
+set(FLEET_SOURCES
     src/MaintenanceSchedule.cpp
     src/MaintenanceRecord.cpp
     src/Vehicle.cpp
     src/Sedan.cpp
     src/FleetManager.cpp
+    src/Van.cpp
+    src/Truck.cpp
 )
 
-add_executable(Vehicle_Manager ${TEST_CASES} ${VEHICLE_MANAGER} "src/Van.cpp" "include/Van.h" "include/Truck.h" "src/Truck.cpp" "include/ServiceDate.h")
+add_executable(Vehicle_Manager_Test ${TEST_CASES} ${FLEET_SOURCES})
 
-target_link_libraries(Vehicle_Manager PRIVATE gtest_main)
+target_link_libraries(Vehicle_Manager_Test PRIVATE gtest_main)
 
+target_include_directories(Vehicle_Manager_Test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_compile_features(Vehicle_Manager_Test PRIVATE cxx_std_14)
+
+add_executable(Vehicle_Manager src/main.cpp ${FLEET_SOURCES})
 target_include_directories(Vehicle_Manager PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_compile_features(Vehicle_Manager PRIVATE cxx_std_14)
 
 enable_testing()
 include(GoogleTest)
-gtest_discover_tests(Vehicle_Manager)
+gtest_discover_tests(Vehicle_Manager_Test)
