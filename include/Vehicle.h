@@ -3,19 +3,23 @@
 #ifndef VEHICLE_H //lines prevent header from being included multiple times in a single compilation unit, which can cause errors due to redefinition of classes, functions, or variables.
 #define VEHICLE_H 
 
+#include "MaintenanceRecord.h"
+#include "MaintenanceSchedule.h"
+
 #include <string> // inldues standard library for stirng type
+#include <vector> // needed for records
 enum class VehicleStatus // gives possible status values for a vehicle stored under a class called vehicle status
 {
     AVAILABLE,
     IN_SERVICE,
-    OVERDUE,
     OUT_OF_SERVICE
 };
 
 class Vehicle
 {
 public:
-    Vehicle(std::string vin, // all of these are public member variables that can be accessed by other classes and functions. They are used to store information about a vehicle, such as its VIN, make, model, year, mileage, and status.
+    // Throws std::invalid_argument if the initial mileage is negative.
+    Vehicle(std::string vin,
             std::string make,
             std::string model,
             int year,
@@ -30,10 +34,19 @@ public:
     int getMileage() const; // gets mileage
     VehicleStatus getStatus() const; // gets status
 
-    void updateMileage(int mileage); // updates mileage
+    // Sets the absolute odometer reading in miles. Equal readings are allowed.
+    // Throws std::invalid_argument for a negative or lower reading and keeps the old value.
+    void updateMileage(int newMileage);
     void setStatus(VehicleStatus status); // sets status
 
-    virtual bool isServiceRequired() const = 0; // pure virtual fucntion so you cant make a plain vehicle, it has to be sedan truck etc.
+    void addMaintenanceSchedule(const MaintenanceSchedule& schedule); // each vehicle will maintain its own scheduel and hsitory
+    const std::vector<MaintenanceSchedule>& getMaintenanceSchedules() const;
+    const std::vector<MaintenanceRecord>& getMaintenanceHistory() const;
+
+    // Logs the service and updates a matching schedule, if one exists.
+    void logServiceEvent(const MaintenanceRecord& record);
+
+    virtual bool isServiceRequired() const; 
 
 private:
     std::string vin; // attributes stored in the vehicle
@@ -42,6 +55,8 @@ private:
     int year;
     int mileage;
     VehicleStatus status;
+    std::vector<MaintenanceSchedule> maintenanceSchedules;
+    std::vector<MaintenanceRecord> maintenanceHistory;
 };
 
 #endif

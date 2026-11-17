@@ -1,6 +1,9 @@
 #include <gtest/gtest.h>
 #include "Vehicle.h"
 
+#include <stdexcept>
+#include <utility>
+
 // Concrete subclass used to instantiate and test the abstract Vehicle class
 class TestVehicle : public Vehicle {
 public:
@@ -50,14 +53,47 @@ TEST_F(VehicleTest, UpdateMileage) {
     EXPECT_EQ(vehicle.getMileage(), 26500);
 }
 
+TEST_F(VehicleTest, AcceptsZeroInitialMileage) {
+    const TestVehicle vehicle("VIN001", "Toyota", "Camry", 2021, 0);
+
+    EXPECT_EQ(vehicle.getMileage(), 0);
+}
+
+TEST_F(VehicleTest, RejectsNegativeInitialMileage) {
+    EXPECT_THROW(TestVehicle("VIN001", "Toyota", "Camry", 2021, -1), std::invalid_argument);
+}
+
+TEST_F(VehicleTest, AcceptsSameMileage) {
+    TestVehicle vehicle("VIN001", "Toyota", "Camry", 2021, 10000);
+
+    EXPECT_NO_THROW(vehicle.updateMileage(10000));
+    EXPECT_EQ(vehicle.getMileage(), 10000);
+}
+
+TEST_F(VehicleTest, RejectsNegativeMileageUpdateAtZero) {
+    TestVehicle vehicle("VIN001", "Toyota", "Camry", 2021, 0);
+
+    EXPECT_THROW(vehicle.updateMileage(-1), std::invalid_argument);
+    EXPECT_EQ(vehicle.getMileage(), 0);
+}
+
+TEST_F(VehicleTest, RejectsDecreaseAfterMileageIncrease) {
+    TestVehicle vehicle("VIN001", "Toyota", "Camry", 2021, 10000);
+
+    vehicle.updateMileage(12000);
+
+    EXPECT_THROW(vehicle.updateMileage(11000), std::invalid_argument);
+    EXPECT_EQ(vehicle.getMileage(), 12000);
+}
+
 // 4. Test changing vehicle status
 TEST_F(VehicleTest, SetStatus) {
     TestVehicle vehicle("VIN987654321", "Tesla", "Model 3", 2022, 1200);
 
     EXPECT_EQ(vehicle.getStatus(), VehicleStatus::AVAILABLE);
 
-    vehicle.setStatus(VehicleStatus::OVERDUE);
-    EXPECT_EQ(vehicle.getStatus(), VehicleStatus::OVERDUE);
+    vehicle.setStatus(VehicleStatus::IN_SERVICE);
+    EXPECT_EQ(vehicle.getStatus(), VehicleStatus::IN_SERVICE);
 
     vehicle.setStatus(VehicleStatus::OUT_OF_SERVICE);
     EXPECT_EQ(vehicle.getStatus(), VehicleStatus::OUT_OF_SERVICE);
@@ -75,4 +111,33 @@ TEST_F(VehicleTest, PureVirtualServiceRequiredBehavior) {
     // Test through polymorphism (Base class pointer)
     Vehicle* vPtr = &highMileageVehicle;
     EXPECT_TRUE(vPtr->isServiceRequired());
+}
+
+TEST_F(VehicleTest, LoggingServiceResetsDueMileageButKeepsScheduleAndHistory)
+{
+    Vehicle vehicle("VIN001", "Toyota", "Camry", 2021, 15000);
+
+    vehicle.addMaintenanceSchedule(
+        MaintenanceSchedule("Oil Change", 5000, 10000));
+
+    EXPECT_TRUE(vehicle.isServiceRequired());
+
+    const MaintenanceRecord record(
+        "MR-001", "Oil Change", "2026-11-16", 15000, 5000);
+    vehicle.logServiceEvent(record);
+
+    ASSERT_EQ(vehicle.getMaintenanceHistory().size(), 1u);
+    EXPECT_EQ(vehicle.getMaintenanceHistory()[0].getRecordId(), "MR-001");
+
+    ASSERT_EQ(vehicle.getMaintenanceSchedules().size(), 1u);
+    EXPECT_EQ(vehicle.getMaintenanceSchedules()[0].getLastServiceMileage(), 15000);
+    EXPECT_EQ(vehicle.getMaintenanceSchedules()[0].getIntervalMiles(), 5000);
+
+    EXPECT_FALSE(vehicle.isServiceRequired());
+
+    vehicle.updateMileage(19999);
+    EXPECT_FALSE(vehicle.isServiceRequired());
+
+    vehicle.updateMileage(20000);
+    EXPECT_TRUE(vehicle.isServiceRequired());
 }
