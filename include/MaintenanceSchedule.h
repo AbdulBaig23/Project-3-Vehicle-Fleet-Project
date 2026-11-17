@@ -7,17 +7,29 @@ class MaintenanceSchedule
 {
 public:
     MaintenanceSchedule(const std::string& serviceName, int intervalMiles, int lastServiceMileage); // prevents copying the original variable but also prevents modification of that variable
+    // Due when either threshold is reached; dates use YYYY-MM-DD.
+    MaintenanceSchedule(const std::string& serviceName, int intervalMiles,
+        int lastServiceMileage, int intervalDays,
+        const std::string& lastServiceDate);
+    int getIntervalDays() const;
+    const std::string& getLastServiceDate() const;
+    bool isOverdue(int currentMileage, const std::string& currentDate) const;
+    void recordService(int currentMileage, const std::string& serviceDate);
+
     const std::string& getServiceName() const; // gets service name. uses const so getter wont change the schedule
     int getIntervalMiles() const; // const needed at end so code cant adjust miles and then return them
     int getLastServiceMileage() const;
 
     bool isOverdue(int currentMileage) const; // checks if the service is overdue based on the current mileage and the last service mileage
+    // Mileage-only schedules can omit a date; timed schedules must supply one.
     void recordService(int currentMileage);
 
 private:
     std::string serviceName; // attributes stored in the maintenance schedule
     int intervalMiles;
     int lastServiceMileage;
+    int intervalDays = 0; // Zero means mileage-only.
+    std::string lastServiceDate;
 
 };
 

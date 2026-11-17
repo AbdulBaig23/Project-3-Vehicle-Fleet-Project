@@ -28,7 +28,7 @@ set(VEHICLE_MANAGER
     src/Vehicle.cpp
 )
 
-add_executable(Vehicle_Manager ${TEST_CASES} ${VEHICLE_MANAGER})
+add_executable(Vehicle_Manager ${TEST_CASES} ${VEHICLE_MANAGER} "src/Van.cpp" "include/Van.h" "include/Truck.h" "src/Truck.cpp" "include/ServiceDate.h")
 
 target_link_libraries(Vehicle_Manager PRIVATE gtest_main)
 

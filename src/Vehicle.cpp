@@ -1,16 +1,17 @@
 #include "Vehicle.h"
+#include "ServiceDate.h"
 
 #include <stdexcept>
 #include <utility>
 
 Vehicle::Vehicle(std::string vin,
-                 std::string make,
-                 std::string model,
-                 int year,
-                 int mileage,
-                 VehicleStatus status)
+    std::string make,
+    std::string model,
+    int year,
+    int mileage,
+    VehicleStatus status)
     : vin(std::move(vin)), make(std::move(make)), model(std::move(model)),
-      year(year), mileage(mileage), status(status)
+    year(year), mileage(mileage), status(status)
 {
     if (mileage < 0) {
         throw std::invalid_argument("Initial mileage must not be negative.");
@@ -31,6 +32,13 @@ void Vehicle::updateMileage(int newMileage)
     }
     mileage = newMileage;
 }
+
+const std::string& Vehicle::getLicensePlate() const { return licensePlate; }
+void Vehicle::setLicensePlate(std::string plate) { licensePlate = std::move(plate); }
+std::string Vehicle::getVehicleType() const { return "Vehicle"; }
+void Vehicle::setMake(std::string value) { make = std::move(value); }
+void Vehicle::setModel(std::string value) { model = std::move(value); }
+void Vehicle::setYear(int value) { year = value; }
 
 void Vehicle::setStatus(VehicleStatus newStatus) { status = newStatus; }
 
@@ -83,20 +91,32 @@ void Vehicle::logServiceEvent(const MaintenanceRecord& record)
         }
     }
 
-    maintenanceHistory.push_back(record);
-
     if (matchingSchedule != nullptr) {
-        matchingSchedule->recordService(serviceMileage);
+        // Validate and allocate before either the schedule or history changes
+        MaintenanceSchedule updated = *matchingSchedule;
+        updated.recordService(serviceMileage, record.getServiceDate());
+        maintenanceHistory.push_back(record);
+        std::swap(*matchingSchedule, updated);
+    }
+    else {
+        maintenanceHistory.push_back(record);
     }
 }
 
 bool Vehicle::isServiceRequired() const
 {
+    return isServiceRequired(fleet_detail::todayUtc());
+}
+
+bool Vehicle::isServiceRequired(const std::string& currentDate) const
+{
+    fleet_detail::serviceDay(currentDate);
+    bool due = false;
     for (const MaintenanceSchedule& schedule : maintenanceSchedules) {
-        if (schedule.isOverdue(mileage)) {
-            return true;
+        if (schedule.isOverdue(mileage, currentDate)) {
+            due = true;
         }
     }
 
-    return false;
+    return due;
 }
