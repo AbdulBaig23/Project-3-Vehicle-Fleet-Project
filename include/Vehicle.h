@@ -20,11 +20,11 @@ class Vehicle
 public:
     // Throws std::invalid_argument if the initial mileage is negative.
     Vehicle(std::string vin,
-            std::string make,
-            std::string model,
-            int year,
-            int mileage,
-            VehicleStatus status = VehicleStatus::AVAILABLE); // can edit avalible to set default to a different option
+        std::string make,
+        std::string model,
+        int year,
+        int mileage,
+        VehicleStatus status = VehicleStatus::AVAILABLE); // can edit avalible to set default to a different option
     virtual ~Vehicle() = default; // tells the compiler to provide the usual destructor. virtual is included because this class has child classes which will get cleaned up correctly
 
     const std::string& getVin() const; // gets vin
@@ -37,6 +37,12 @@ public:
     // Sets the absolute odometer reading in miles. Equal readings are allowed.
     // Throws std::invalid_argument for a negative or lower reading and keeps the old value.
     void updateMileage(int newMileage);
+    const std::string& getLicensePlate() const;
+    void setLicensePlate(std::string plate);
+    virtual std::string getVehicleType() const;
+    void setMake(std::string make);
+    void setModel(std::string model);
+    void setYear(int year);
     void setStatus(VehicleStatus status); // sets status
 
     void addMaintenanceSchedule(const MaintenanceSchedule& schedule); // each vehicle will maintain its own scheduel and hsitory
@@ -46,9 +52,12 @@ public:
     // Logs the service and updates a matching schedule, if one exists.
     void logServiceEvent(const MaintenanceRecord& record);
 
-    virtual bool isServiceRequired() const; 
+    // No-argument check uses today's UTC date. The dated overload supports reports.
+    virtual bool isServiceRequired() const;
+    bool isServiceRequired(const std::string& currentDate) const;
 
 private:
+    std::string licensePlate;
     std::string vin; // attributes stored in the vehicle
     std::string make;
     std::string model;
